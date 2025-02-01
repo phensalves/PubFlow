@@ -1,0 +1,70 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pubflow-backend
+    environment:
+      - RAILS_ENV=development
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
+    ports:
+      - "3001:3001"
+    depends_on:
+      - db
+      - elasticsearch
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: pubflow-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+
+  db:
+    image: postgres:13
+    container_name: pubflow-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: pubflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
+    container_name: pubflow-elasticsearch
+    environment:
+      - discovery.type=single-node
+    ports:
+      - "9200:9200"
+
+  airflow:
+    image: puckel/docker-airflow
+    container_name: pubflow-airflow
+    platform: linux/amd64
+    ports:
+      - "8080:8080"
+    environment:
+      - LOAD_EX=n
+    depends_on:
+      - db
+
+  external-sales-api:
+    build:
+      context: ./external-sales-api
+      dockerfile: Dockerfile
+    container_name: external-sales-api
+    ports:
+      - "5001:5001"
+
+volumes:
+  db_data:

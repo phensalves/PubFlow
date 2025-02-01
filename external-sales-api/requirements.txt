@@ -1,0 +1,4 @@
+Flask==3.1.0
+uuid==1.30
+random2==1.0.1
+datetime==5.2
