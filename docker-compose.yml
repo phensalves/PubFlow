@@ -6,9 +6,9 @@ services:
     container_name: pubflow-backend
     environment:
       - RAILS_ENV=development
-      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
+      - SECRET_KEY_BASE=${PUBFLOW_SECRET_KEY}
     ports:
-      - "3001:3001"
+      - "3001:3000"
     depends_on:
       - db
       - elasticsearch
@@ -31,13 +31,24 @@ services:
     image: postgres:13
     container_name: pubflow-db
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: pubflow
+      POSTGRES_USER: postgres  # Ensure default user exists
+      POSTGRES_PASSWORD: ${PUBFLOW_DATABASE_PASSWORD}
+      PUBFLOW_DATABASE_USERNAME: ${PUBFLOW_DATABASE_USERNAME}
+      PUBFLOW_DATABASE_PASSWORD: ${PUBFLOW_DATABASE_PASSWORD}
+      PUBFLOW_DATABASE_NAME: ${PUBFLOW_DATABASE_NAME}
+      AIRFLOW_DATABASE_USERNAME: ${AIRFLOW_DATABASE_USERNAME}
+      AIRFLOW_DATABASE_PASSWORD: ${AIRFLOW_DATABASE_PASSWORD}
+      AIRFLOW_DATABASE_NAME: ${AIRFLOW_DATABASE_NAME}
     ports:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+      - ./database/db-init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
@@ -49,14 +60,25 @@ services:
 
   airflow:
     image: puckel/docker-airflow
+    build:
+      context: ./etl
+      dockerfile: Dockerfile
     container_name: pubflow-airflow
     platform: linux/amd64
     ports:
       - "8080:8080"
     environment:
-      - LOAD_EX=n
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${AIRFLOW_DATABASE_USERNAME}:${AIRFLOW_DATABASE_PASSWORD}@db/airflow_db
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    volumes:
+      - ./etl/dags:/opt/airflow/dags
+    command: >
+      bash -c "
+      airflow db check-migrations || (airflow db init && airflow db upgrade);
+      exec airflow scheduler & exec airflow webserver"
+
 
   external-sales-api:
     build:

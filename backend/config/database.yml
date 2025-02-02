@@ -26,8 +26,8 @@ default: &default
 development:
   <<: *default
   database: pubflow_development
-  username: <%= ENV["PUBFLOW_DEV_DATABASE_USERNAME"] %>
-  password: <%= ENV["PUBFLOW_DEV_DATABASE_PASSWORD"] %>
+  username: <%= ENV["PUBFLOW_DATABASE_USERNAME"] %>
+  password: <%= ENV["PUBFLOW_DATABASE_PASSWORD"] %>
   # The specified database role being used to connect to PostgreSQL.
   # To create additional roles in PostgreSQL see `$ createuser --help`.
   # When left blank, PostgreSQL will use the default role. This is

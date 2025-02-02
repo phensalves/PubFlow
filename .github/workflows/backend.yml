@@ -1,0 +1,36 @@
+name: CI - Backend
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:13
+        ports:
+          - 5432:5432
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.3
+      - name: Install dependencies
+        run: |
+          cd backend
+          gem install bundler
+          bundle install
+      - name: Run tests
+        run: |
+          cd backend
+          RAILS_ENV=test rails db:create db:migrate
+          bundle exec rspec

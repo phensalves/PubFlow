@@ -1,20 +1,20 @@
 # Dockerfile for etl (Airflow)
-FROM apache/airflow:2.5.0
+FROM apache/airflow:2.6.3-python3.8
 
 # Define working directory
 WORKDIR /opt/airflow
 
 # Copy project dependencies
-COPY etl/requirements.txt ./
+COPY requirements.txt ./
 
 # Install dependencies
 RUN pip install -r requirements.txt
 
 # Copy remaining project files
-COPY etl/dags /opt/airflow/dags
+COPY dags /opt/airflow/dags
 
 # Expose Airflow port
 EXPOSE 8080
 
 # Default command
-CMD ["airflow", "webserver"]
+CMD ["bash", "-c", "airflow db init && airflow webserver"]
