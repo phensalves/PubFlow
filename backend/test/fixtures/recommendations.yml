@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  product: one
+  score: 9.99
+  generated_at: 2025-02-02 01:45:09
+
+two:
+  product: two
+  score: 9.99
+  generated_at: 2025-02-02 01:45:09

@@ -70,3 +70,6 @@ yarn-debug.log*
 /public/uploads
 
 .DS_Store
+
+# ignore etl cache files
+etl/dags/__pycache__/
