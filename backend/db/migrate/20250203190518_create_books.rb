@@ -1,6 +1,6 @@
-class CreateProducts < ActiveRecord::Migration[8.0]
+class CreateBooks < ActiveRecord::Migration[8.0]
   def change
-    create_table :products do |t|
+    create_table :books do |t|
       t.string :title
       t.string :author
       t.string :genre

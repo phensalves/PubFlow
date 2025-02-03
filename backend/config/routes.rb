@@ -1,4 +1,11 @@
 Rails.application.routes.draw do
+  # Define the routes for the API
+  namespace :api do
+    resources :books
+    resources :customers
+    resources :sales, only: [:index, :show, :create]
+    resources :recommendations, only: [:index, :show, :create]
+  end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
